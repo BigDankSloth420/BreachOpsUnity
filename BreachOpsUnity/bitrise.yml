@@ -1,0 +1,32 @@
+format_version: '11'
+default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
+
+project_type: other
+
+workflows:
+  unity-android:
+    steps:
+      - git-clone: {}
+      - script:
+          title: Set Up Unity Build
+          inputs:
+            - content: |
+                #!/bin/bash
+                UNITY_PATH="/Applications/Unity/Hub/Editor/2022.3.0f1/Unity.app/Contents/MacOS/Unity"
+                if [ -x "$UNITY_PATH" ]; then
+                  echo "Found Unity."
+                else
+                  echo "Unity not found. Set correct UNITY_PATH."
+                  exit 1
+                fi
+      - script:
+          title: Build Unity Project
+          inputs:
+            - content: |
+                #!/bin/bash
+                "$UNITY_PATH" -batchmode -nographics -quit \
+                -projectPath "$BITRISE_SOURCE_DIR" \
+                -buildTarget Android \
+                -executeMethod BuildScript.PerformBuild \
+                -logFile
+      - deploy-to-bitrise-io: {}
